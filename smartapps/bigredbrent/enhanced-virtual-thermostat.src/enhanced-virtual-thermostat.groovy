@@ -180,11 +180,14 @@ private evaluate()
         }
     }
     else {
+        if (heatOutlets) {
+            heatOutlets.off()
+        }
         if (coolOutlets) {
             coolOutlets.off()
         }
-        if (heatOutlets) {
-            heatOutlets.off()
+        if (emergencyHeatOutlets) {
+            emergencyHeatOutlets.off()
         }
     }
 }
