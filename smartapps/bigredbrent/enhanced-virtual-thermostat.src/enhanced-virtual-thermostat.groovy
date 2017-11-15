@@ -63,41 +63,21 @@ private def subscribeEventHandlers()
     if (simulatedTemperatureSensors) {
         simulatedTemperatureSensors.setTemperature(sensor.currentValue("temperature"))
     }
-    subscribe(thermostat, "thermostatMode", thermostatModeHandler)
+    subscribe(thermostat, "thermostatMode", setThermostatTemperature)
     if (heatOutlets) {
-        subscribe(thermostat, "heatingSetpoint", setpointHandler)
+        subscribe(thermostat, "heatingSetpoint", setThermostatTemperature)
     }
     if (coolOutlets) {
-        subscribe(thermostat, "coolingSetpoint", setpointHandler)
+        subscribe(thermostat, "coolingSetpoint", setThermostatTemperature)
     }
     setThermostatTemperature()
-    evaluate()
 }
 
-def temperatureHandler(evt)
+private def temperatureHandler(evt)
 {
     if (simulatedTemperatureSensors) {
         simulatedTemperatureSensors.setTemperature(evt.value)
     }
-    evaluate()
-}
-
-def thermostatModeHandler(evt)
-{
-    setThermostatTemperature()
-    def mode = evt.value
-    if (heatOutlets && mode != "heat") {
-        heatOutlets.off()
-    }
-    if (coolOutlets && mode != "cool") {
-        coolOutlets.off()
-    }
-    evaluate()
-}
-
-def setpointHandler(evt)
-{
-    setThermostatTemperature()
     evaluate()
 }
 
@@ -122,6 +102,7 @@ private def setThermostatTemperature()
     else {
         thermostat.setTemperature()
     }
+    evaluate()
 }
 
 private evaluate()
@@ -129,6 +110,9 @@ private evaluate()
     def mode = thermostat.currentValue("thermostatMode")
     def currentTemp = sensor.currentValue("temperature")
     if (heatOutlets && mode == "heat") {
+        if (coolOutlets) {
+            coolOutlets.off()
+        }
         def setpoint = thermostat.currentValue("heatingSetpoint")
         if (currentTemp >= setpoint) {
             heatOutlets.off()
@@ -138,6 +122,9 @@ private evaluate()
         }
     }
     else if (coolOutlets && mode == "cool") {
+        if (heatOutlets) {
+            heatOutlets.off()
+        }
         def setpoint = thermostat.currentValue("coolingSetpoint")
         if (currentTemp <= setpoint) {
             coolOutlets.off()
