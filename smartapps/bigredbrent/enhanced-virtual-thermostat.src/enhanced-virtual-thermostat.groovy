@@ -91,20 +91,26 @@ def setpointHandler(evt)
 private def setThermostatTemperature()
 {
     def mode = thermostat.currentValue("thermostatMode")
-    if (mode == "auto" && thermostat.currentValue("coolingSetpoint") - thermostat.currentValue("heatingSetpoint") < 4) {
-        if (thermostat.currentValue("heatingSetpoint") + 4 <= 95) {
-            thermostat.setCoolingSetpoint(thermostat.currentValue("heatingSetpoint") + 4)
+    def currentTemp = sensor.currentValue("temperature")
+    def heatingSetpoint = thermostat.currentValue("heatingSetpoint")
+    def coolingSetpoint = thermostat.currentValue("coolingSetpoint")
+    if (mode == "auto" && coolingSetpoint - heatingSetpoint < 4) {
+        if (heatingSetpoint + 4 <= 95) {
+            thermostat.setCoolingSetpoint(heatingSetpoint + 4)
         }
         else {
             thermostat.setHeatingSetpoint(91)
             thermostat.setCoolingSetpoint(95)
         }
     }
-    if (heatOutlets && mode == "heat") {
-        thermostat.setTemperature(thermostat.currentValue("heatingSetpoint"))
+    if (heatOutlets && mode == "auto" && (!coolOutlets || currentTemp <= heatingSetpoint || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp)) {
+        thermostat.setTemperature(heatingSetpoint)
     }
-    else if (coolOutlets && mode == "cool") {
-        thermostat.setTemperature(thermostat.currentValue("coolingSetpoint"))
+    else if (heatOutlets && mode == "heat") {
+        thermostat.setTemperature(heatingSetpoint)
+    }
+    else if (coolOutlets && (mode == "cool" || mode == "auto")) {
+        thermostat.setTemperature(coolingSetpoint)
     }
     else {
         thermostat.setTemperature()
@@ -115,28 +121,48 @@ private evaluate()
 {
     def mode = thermostat.currentValue("thermostatMode")
     def currentTemp = sensor.currentValue("temperature")
+    def heatingSetpoint = thermostat.currentValue("heatingSetpoint")
+    def coolingSetpoint = thermostat.currentValue("coolingSetpoint")
     if (heatOutlets && mode == "heat") {
         if (coolOutlets) {
             coolOutlets.off()
         }
-        def setpoint = thermostat.currentValue("heatingSetpoint")
-        if (currentTemp >= setpoint) {
-            heatOutlets.off()
-        }
-        else if (currentTemp < setpoint - threshold) {
+        if (currentTemp < heatingSetpoint - threshold) {
             heatOutlets.on()
+        }
+        else if (currentTemp >= heatingSetpoint) {
+            heatOutlets.off()
         }
     }
     else if (coolOutlets && mode == "cool") {
         if (heatOutlets) {
             heatOutlets.off()
         }
-        def setpoint = thermostat.currentValue("coolingSetpoint")
-        if (currentTemp <= setpoint) {
+        if (currentTemp > coolingSetpoint + threshold) {
+            coolOutlets.on()
+        }
+        else if (currentTemp <= coolingSetpoint) {
             coolOutlets.off()
         }
-        else if (currentTemp > setpoint + threshold) {
+    }
+    else if ((coolOutlets || heatOutlets) && mode == "auto") {
+        if (heatOutlets && currentTemp < heatingSetpoint - threshold) {
+            if (coolOutlets) {
+                coolOutlets.off()
+            }
+            heatOutlets.on()
+        }
+        else if (coolOutlets && currentTemp > coolingSetpoint + threshold) {
+            if (heatOutlets) {
+                heatOutlets.off()
+            }
             coolOutlets.on()
+        }
+        else if (heatOutlets && currentTemp >= heatingSetpoint) {
+            heatOutlets.off()
+        }
+        else if (coolOutlets && currentTemp <= coolingSetpoint) {
+            coolOutlets.off()
         }
     }
     else {
