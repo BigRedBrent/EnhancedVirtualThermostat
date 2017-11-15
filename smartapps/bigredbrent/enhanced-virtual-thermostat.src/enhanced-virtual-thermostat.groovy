@@ -17,7 +17,7 @@
 definition(
     name: "Enhanced Virtual Thermostat",
     namespace: "BigRedBrent",
-    author: "SmartThings, BigRedBrent",
+    author: "BigRedBrent",
     description: "Control a space heater or window air conditioner in conjunction with any temperature sensor, like a SmartSense Multi.",
     category: "Green Living",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Meta/temp_thermo-switch.png",
