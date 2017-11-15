@@ -42,7 +42,7 @@ preferences {
         input "threshold", "decimal", title: "Threshold", defaultValue: 0.1, required: true
     }
     section("Simulated temperature sensor(s) to copy the current temperature to... (not required)"){
-        input "simulatedTemperatureSensor", "capability.temperatureMeasurement", title: "Simulated Temperature Sensors", multiple: true, required: false
+        input "simulatedTemperatureSensors", "capability.temperatureMeasurement", title: "Simulated Temperature Sensors", multiple: true, required: false
     }
 }
 
@@ -60,8 +60,8 @@ def updated()
 private def subscribeEventHandlers()
 {
     subscribe(sensor, "temperature", temperatureHandler)
-    if (simulatedTemperatureSensor) {
-        simulatedTemperatureSensor.setTemperature(sensor.currentValue("temperature"))
+    if (simulatedTemperatureSensors) {
+        simulatedTemperatureSensors.setTemperature(sensor.currentValue("temperature"))
     }
     subscribe(thermostat, "thermostatMode", thermostatModeHandler)
     if (heatOutlets) {
@@ -76,8 +76,8 @@ private def subscribeEventHandlers()
 
 def temperatureHandler(evt)
 {
-    if (simulatedTemperatureSensor) {
-        simulatedTemperatureSensor.setTemperature(evt.value)
+    if (simulatedTemperatureSensors) {
+        simulatedTemperatureSensors.setTemperature(evt.value)
     }
     evaluate()
 }
