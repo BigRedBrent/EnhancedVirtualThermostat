@@ -127,6 +127,9 @@ private evaluate()
         if (coolOutlets) {
             coolOutlets.off()
         }
+        if (emergencyHeatOutlets) {
+            emergencyHeatOutlets.off()
+        }
         if (currentTemp < heatingSetpoint - threshold) {
             heatOutlets.on()
         }
@@ -138,6 +141,9 @@ private evaluate()
         if (heatOutlets) {
             heatOutlets.off()
         }
+        if (emergencyHeatOutlets) {
+            emergencyHeatOutlets.off()
+        }
         if (currentTemp > coolingSetpoint + threshold) {
             coolOutlets.on()
         }
@@ -146,6 +152,9 @@ private evaluate()
         }
     }
     else if (mode == "auto" && (coolOutlets || heatOutlets)) {
+        if (emergencyHeatOutlets) {
+            emergencyHeatOutlets.off()
+        }
         if (heatOutlets && currentTemp < heatingSetpoint - threshold) {
             if (coolOutlets) {
                 coolOutlets.off()
