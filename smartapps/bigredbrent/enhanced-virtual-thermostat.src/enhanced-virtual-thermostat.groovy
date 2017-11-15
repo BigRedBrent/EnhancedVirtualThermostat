@@ -38,6 +38,9 @@ preferences {
     section("Select air conditioner outlet(s)... "){
         input "coolOutlets", "capability.switch", title: "Air Conditioner Outlets", multiple: true, required: false
     }
+    section("Select emergency heater outlet(s)... "){
+        input "emergencyHeatOutlets", "capability.switch", title: "Emergency Heater Outlets", multiple: true, required: false
+    }
     section("How far away from the desired temperature before activating..."){
         input "threshold", "decimal", title: "Threshold", defaultValue: 0.1, required: true
     }
@@ -64,7 +67,7 @@ private def subscribeEventHandlers()
         simulatedTemperatureSensors.setTemperature(sensor.currentValue("temperature"))
     }
     subscribe(thermostat, "thermostatMode", setpointHandler)
-    if (heatOutlets) {
+    if (heatOutlets || emergencyHeatOutlets) {
         subscribe(thermostat, "heatingSetpoint", setpointHandler)
     }
     if (coolOutlets) {
@@ -103,13 +106,10 @@ private def setThermostatTemperature()
             thermostat.setCoolingSetpoint(95)
         }
     }
-    if (heatOutlets && mode == "auto" && (!coolOutlets || currentTemp <= heatingSetpoint || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp)) {
+    if ((mode == "auto" && heatOutlets && (!coolOutlets || currentTemp <= heatingSetpoint || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp)) || (mode == "heat" && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets)) {
         thermostat.setTemperature(heatingSetpoint)
     }
-    else if (heatOutlets && mode == "heat") {
-        thermostat.setTemperature(heatingSetpoint)
-    }
-    else if (coolOutlets && (mode == "cool" || mode == "auto")) {
+    else if ((mode == "cool" || mode == "auto") && coolOutlets) {
         thermostat.setTemperature(coolingSetpoint)
     }
     else {
@@ -123,7 +123,7 @@ private evaluate()
     def currentTemp = sensor.currentValue("temperature")
     def heatingSetpoint = thermostat.currentValue("heatingSetpoint")
     def coolingSetpoint = thermostat.currentValue("coolingSetpoint")
-    if (heatOutlets && mode == "heat") {
+    if (mode == "heat" && heatOutlets) {
         if (coolOutlets) {
             coolOutlets.off()
         }
@@ -134,7 +134,7 @@ private evaluate()
             heatOutlets.off()
         }
     }
-    else if (coolOutlets && mode == "cool") {
+    else if (mode == "cool" && coolOutlets) {
         if (heatOutlets) {
             heatOutlets.off()
         }
@@ -145,7 +145,7 @@ private evaluate()
             coolOutlets.off()
         }
     }
-    else if ((coolOutlets || heatOutlets) && mode == "auto") {
+    else if (mode == "auto" && (coolOutlets || heatOutlets)) {
         if (heatOutlets && currentTemp < heatingSetpoint - threshold) {
             if (coolOutlets) {
                 coolOutlets.off()
@@ -163,6 +163,20 @@ private evaluate()
         }
         else if (coolOutlets && currentTemp <= coolingSetpoint) {
             coolOutlets.off()
+        }
+    }
+    else if (mode == "emergency heat" && emergencyHeatOutlets) {
+        if (coolOutlets) {
+            coolOutlets.off()
+        }
+        if (heatOutlets) {
+            heatOutlets.off()
+        }
+        if (currentTemp < heatingSetpoint - threshold) {
+            emergencyHeatOutlets.on()
+        }
+        else if (currentTemp >= heatingSetpoint) {
+            emergencyHeatOutlets.off()
         }
     }
     else {
