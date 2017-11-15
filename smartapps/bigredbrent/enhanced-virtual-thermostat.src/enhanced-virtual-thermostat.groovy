@@ -63,17 +63,17 @@ private def subscribeEventHandlers()
     if (simulatedTemperatureSensors) {
         simulatedTemperatureSensors.setTemperature(sensor.currentValue("temperature"))
     }
-    subscribe(thermostat, "thermostatMode", setThermostatTemperature)
+    subscribe(thermostat, "thermostatMode", setThermostatTemperatureHandler)
     if (heatOutlets) {
-        subscribe(thermostat, "heatingSetpoint", setThermostatTemperature)
+        subscribe(thermostat, "heatingSetpoint", setThermostatTemperatureHandler)
     }
     if (coolOutlets) {
-        subscribe(thermostat, "coolingSetpoint", setThermostatTemperature)
+        subscribe(thermostat, "coolingSetpoint", setThermostatTemperatureHandler)
     }
-    setThermostatTemperature()
+    setThermostatTemperatureHandler()
 }
 
-private def temperatureHandler(evt)
+def temperatureHandler(evt)
 {
     if (simulatedTemperatureSensors) {
         simulatedTemperatureSensors.setTemperature(evt.value)
@@ -81,7 +81,7 @@ private def temperatureHandler(evt)
     evaluate()
 }
 
-private def setThermostatTemperature()
+def setThermostatTemperatureHandler()
 {
     def mode = thermostat.currentValue("thermostatMode")
     if (mode == "auto" && thermostat.currentValue("coolingSetpoint") - thermostat.currentValue("heatingSetpoint") < 4) {
