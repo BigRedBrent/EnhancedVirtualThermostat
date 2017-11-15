@@ -86,6 +86,15 @@ def thermostatModeHandler(evt)
 {
     setThermostatTemperature()
     def mode = evt.value
+    if (mode == "auto" && thermostat.currentValue("coolingSetpoint") - thermostat.currentValue("heatingSetpoint") < 4) {
+        if (thermostat.currentValue("heatingSetpoint") + 4 <= 95) {
+            thermostat.setCoolingSetpoint(thermostat.currentValue("heatingSetpoint") + 4)
+        }
+        else {
+            thermostat.setHeatingSetpoint(91)
+            thermostat.setCoolingSetpoint(95)
+        }
+    }
     if (heatOutlets && mode != "heat") {
         heatOutlets.off()
     }
