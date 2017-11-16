@@ -76,8 +76,7 @@ private def subscribeEventHandlers()
             subscribe(thermostat, "coolingSetpoint", setpointHandler)
         }
         evaluate()
-    }
-    else if (simulatedTemperatureSensors) {
+    } else if (simulatedTemperatureSensors) {
         subscribe(sensor, "temperature", temperatureHandler)
     }
 }
@@ -107,19 +106,16 @@ private def setThermostatTemperature()
     if (mode == "auto" && coolingSetpoint - heatingSetpoint < 4) {
         if (heatingSetpoint + 4 <= 95) {
             thermostat.setCoolingSetpoint(heatingSetpoint + 4)
-        }
-        else {
+        } else {
             thermostat.setHeatingSetpoint(91)
             thermostat.setCoolingSetpoint(95)
         }
     }
     if ((mode == "heat" && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets) || (mode == "auto" && heatOutlets && (!coolOutlets || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp))) {
         thermostat.setTemperature(heatingSetpoint)
-    }
-    else if ((mode == "cool" || mode == "auto") && coolOutlets) {
+    } else if ((mode == "cool" || mode == "auto") && coolOutlets) {
         thermostat.setTemperature(coolingSetpoint)
-    }
-    else {
+    } else {
         thermostat.setTemperature()
     }
 }
@@ -139,12 +135,10 @@ private evaluate()
         }
         if (currentTemp < heatingSetpoint - threshold) {
             heatOutlets.on()
-        }
-        else if (currentTemp >= heatingSetpoint) {
+        } else if (currentTemp >= heatingSetpoint) {
             heatOutlets.off()
         }
-    }
-    else if (mode == "cool" && coolOutlets) {
+    } else if (mode == "cool" && coolOutlets) {
         if (heatOutlets) {
             heatOutlets.off()
         }
@@ -153,12 +147,10 @@ private evaluate()
         }
         if (currentTemp > coolingSetpoint + threshold) {
             coolOutlets.on()
-        }
-        else if (currentTemp <= coolingSetpoint) {
+        } else if (currentTemp <= coolingSetpoint) {
             coolOutlets.off()
         }
-    }
-    else if (mode == "auto" && (coolOutlets || heatOutlets)) {
+    } else if (mode == "auto" && (coolOutlets || heatOutlets)) {
         if (emergencyHeatOutlets) {
             emergencyHeatOutlets.off()
         }
@@ -167,21 +159,17 @@ private evaluate()
                 coolOutlets.off()
             }
             heatOutlets.on()
-        }
-        else if (coolOutlets && currentTemp > coolingSetpoint + threshold) {
+        } else if (coolOutlets && currentTemp > coolingSetpoint + threshold) {
             if (heatOutlets) {
                 heatOutlets.off()
             }
             coolOutlets.on()
-        }
-        else if (heatOutlets && currentTemp >= heatingSetpoint) {
+        } else if (heatOutlets && currentTemp >= heatingSetpoint) {
             heatOutlets.off()
-        }
-        else if (coolOutlets && currentTemp <= coolingSetpoint) {
+        } else if (coolOutlets && currentTemp <= coolingSetpoint) {
             coolOutlets.off()
         }
-    }
-    else if (mode == "emergency heat" && emergencyHeatOutlets) {
+    } else if (mode == "emergency heat" && emergencyHeatOutlets) {
         if (coolOutlets) {
             coolOutlets.off()
         }
@@ -190,12 +178,10 @@ private evaluate()
         }
         if (currentTemp < heatingSetpoint - threshold) {
             emergencyHeatOutlets.on()
-        }
-        else if (currentTemp >= heatingSetpoint) {
+        } else if (currentTemp >= heatingSetpoint) {
             emergencyHeatOutlets.off()
         }
-    }
-    else {
+    } else {
         if (heatOutlets) {
             heatOutlets.off()
         }
