@@ -62,19 +62,24 @@ def updated()
 
 private def subscribeEventHandlers()
 {
-    subscribe(sensor, "temperature", temperatureHandler)
+    setThermostatTemperature()
     if (simulatedTemperatureSensors) {
         simulatedTemperatureSensors.setTemperature(sensor.currentValue("temperature"))
     }
-    subscribe(thermostat, "thermostatMode", setpointHandler)
-    if (heatOutlets || emergencyHeatOutlets) {
-        subscribe(thermostat, "heatingSetpoint", setpointHandler)
+    if (heatOutlets || coolOutlets || emergencyHeatOutlets) {
+        subscribe(sensor, "temperature", temperatureHandler)
+        subscribe(thermostat, "thermostatMode", setpointHandler)
+        if (heatOutlets || emergencyHeatOutlets) {
+            subscribe(thermostat, "heatingSetpoint", setpointHandler)
+        }
+        if (coolOutlets) {
+            subscribe(thermostat, "coolingSetpoint", setpointHandler)
+        }
+        evaluate()
     }
-    if (coolOutlets) {
-        subscribe(thermostat, "coolingSetpoint", setpointHandler)
+    else if (simulatedTemperatureSensors) {
+        subscribe(sensor, "temperature", temperatureHandler)
     }
-    setThermostatTemperature()
-    evaluate()
 }
 
 def temperatureHandler(evt)
@@ -82,7 +87,9 @@ def temperatureHandler(evt)
     if (simulatedTemperatureSensors) {
         simulatedTemperatureSensors.setTemperature(evt.value)
     }
-    evaluate()
+    if (heatOutlets || coolOutlets || emergencyHeatOutlets) {
+        evaluate()
+    }
 }
 
 def setpointHandler(evt)
