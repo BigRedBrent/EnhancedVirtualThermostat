@@ -133,10 +133,10 @@ private evaluate()
         if (emergencyHeatOutlets) {
             emergencyHeatOutlets.off()
         }
-        if (currentTemp < heatingSetpoint - threshold) {
-            heatOutlets.on()
-        } else if (currentTemp >= heatingSetpoint) {
+        if (currentTemp >= heatingSetpoint) {
             heatOutlets.off()
+        } else if (currentTemp < heatingSetpoint - threshold) {
+            heatOutlets.on()
         }
     } else if (mode == "cool" && coolOutlets) {
         if (heatOutlets) {
@@ -145,29 +145,29 @@ private evaluate()
         if (emergencyHeatOutlets) {
             emergencyHeatOutlets.off()
         }
-        if (currentTemp > coolingSetpoint + threshold) {
-            coolOutlets.on()
-        } else if (currentTemp <= coolingSetpoint) {
+        if (currentTemp <= coolingSetpoint) {
             coolOutlets.off()
+        } else if (currentTemp > coolingSetpoint + threshold) {
+            coolOutlets.on()
         }
     } else if (mode == "auto" && (coolOutlets || heatOutlets)) {
         if (emergencyHeatOutlets) {
             emergencyHeatOutlets.off()
         }
-        if (heatOutlets && currentTemp < heatingSetpoint - threshold) {
+        if (heatOutlets && currentTemp >= heatingSetpoint) {
+            heatOutlets.off()
+        } else if (heatOutlets && currentTemp < heatingSetpoint - threshold) {
             if (coolOutlets) {
                 coolOutlets.off()
             }
             heatOutlets.on()
+        } else if (coolOutlets && currentTemp <= coolingSetpoint) {
+            coolOutlets.off()
         } else if (coolOutlets && currentTemp > coolingSetpoint + threshold) {
             if (heatOutlets) {
                 heatOutlets.off()
             }
             coolOutlets.on()
-        } else if (heatOutlets && currentTemp >= heatingSetpoint) {
-            heatOutlets.off()
-        } else if (coolOutlets && currentTemp <= coolingSetpoint) {
-            coolOutlets.off()
         }
     } else if (mode == "emergency heat" && emergencyHeatOutlets) {
         if (coolOutlets) {
@@ -176,10 +176,10 @@ private evaluate()
         if (heatOutlets) {
             heatOutlets.off()
         }
-        if (currentTemp < heatingSetpoint - threshold) {
-            emergencyHeatOutlets.on()
-        } else if (currentTemp >= heatingSetpoint) {
+        if (currentTemp >= heatingSetpoint) {
             emergencyHeatOutlets.off()
+        } else if (currentTemp < heatingSetpoint - threshold) {
+            emergencyHeatOutlets.on()
         }
     } else {
         if (heatOutlets) {
