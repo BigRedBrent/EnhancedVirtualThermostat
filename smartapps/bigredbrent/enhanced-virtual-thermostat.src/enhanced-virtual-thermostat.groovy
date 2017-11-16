@@ -151,11 +151,11 @@ private evaluate()
             coolOutlets.on()
         }
     } else if (mode == "emergency heat" && emergencyHeatOutlets) {
-        if (coolOutlets) {
-            coolOutlets.off()
-        }
         if (heatOutlets) {
             heatOutlets.off()
+        }
+        if (coolOutlets) {
+            coolOutlets.off()
         }
         if (currentTemp >= heatingSetpoint) {
             emergencyHeatOutlets.off()
