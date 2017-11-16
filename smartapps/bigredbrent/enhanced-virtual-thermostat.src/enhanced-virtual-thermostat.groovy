@@ -150,20 +150,6 @@ private evaluate()
         } else if (currentTemp > coolingSetpoint + threshold) {
             coolOutlets.on()
         }
-    } else if (mode == "auto" && (coolOutlets || heatOutlets)) {
-        if (emergencyHeatOutlets) {
-            emergencyHeatOutlets.off()
-        }
-        if (heatOutlets && currentTemp >= heatingSetpoint) {
-            heatOutlets.off()
-        } else if (heatOutlets && currentTemp < heatingSetpoint - threshold) {
-            heatOutlets.on()
-        }
-        if (coolOutlets && currentTemp <= coolingSetpoint) {
-            coolOutlets.off()
-        } else if (coolOutlets && currentTemp > coolingSetpoint + threshold) {
-            coolOutlets.on()
-        }
     } else if (mode == "emergency heat" && emergencyHeatOutlets) {
         if (coolOutlets) {
             coolOutlets.off()
@@ -175,6 +161,24 @@ private evaluate()
             emergencyHeatOutlets.off()
         } else if (currentTemp < heatingSetpoint - threshold) {
             emergencyHeatOutlets.on()
+        }
+    } else if (mode == "auto" && (coolOutlets || heatOutlets)) {
+        if (emergencyHeatOutlets) {
+            emergencyHeatOutlets.off()
+        }
+        if (heatOutlets) {
+            if (currentTemp >= heatingSetpoint) {
+                heatOutlets.off()
+            } else if (currentTemp < heatingSetpoint - threshold) {
+                heatOutlets.on()
+            }
+        }
+        if (coolOutlets) {
+            if (currentTemp <= coolingSetpoint) {
+                coolOutlets.off()
+            } else if (currentTemp > coolingSetpoint + threshold) {
+                coolOutlets.on()
+            }
         }
     } else {
         if (heatOutlets) {
