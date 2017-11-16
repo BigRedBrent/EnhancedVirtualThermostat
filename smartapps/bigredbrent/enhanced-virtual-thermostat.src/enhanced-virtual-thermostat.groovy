@@ -106,7 +106,7 @@ private def setThermostatTemperature()
             thermostat.setCoolingSetpoint(95)
         }
     }
-    if ((mode == "auto" && heatOutlets && (!coolOutlets || currentTemp <= heatingSetpoint || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp)) || (mode == "heat" && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets)) {
+    if ((mode == "heat" && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets) || (mode == "auto" && heatOutlets && (!coolOutlets || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp))) {
         thermostat.setTemperature(heatingSetpoint)
     }
     else if ((mode == "cool" || mode == "auto") && coolOutlets) {
