@@ -157,16 +157,11 @@ private evaluate()
         if (heatOutlets && currentTemp >= heatingSetpoint) {
             heatOutlets.off()
         } else if (heatOutlets && currentTemp < heatingSetpoint - threshold) {
-            if (coolOutlets) {
-                coolOutlets.off()
-            }
             heatOutlets.on()
-        } else if (coolOutlets && currentTemp <= coolingSetpoint) {
+        }
+        if (coolOutlets && currentTemp <= coolingSetpoint) {
             coolOutlets.off()
         } else if (coolOutlets && currentTemp > coolingSetpoint + threshold) {
-            if (heatOutlets) {
-                heatOutlets.off()
-            }
             coolOutlets.on()
         }
     } else if (mode == "emergency heat" && emergencyHeatOutlets) {
