@@ -44,7 +44,7 @@ preferences {
     section("How far away from the desired temperature before activating..."){
         input "threshold", "decimal", title: "Threshold", defaultValue: 0.1, required: true
     }
-    section("Dimmer Switch for optional control of the simulated thermostat... (not required)"){
+    section("Simulated dimmer switch for optional control of the simulated thermostat... (not required)"){
         input "dimmer", "capability.switchLevel", title: "Simulated Dimmer Switch", required: false
     }
     section("Simulated temperature sensor(s) to copy the current temperature to... (not required)"){
