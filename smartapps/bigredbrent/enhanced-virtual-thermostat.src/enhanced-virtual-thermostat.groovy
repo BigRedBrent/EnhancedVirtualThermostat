@@ -82,11 +82,11 @@ private def subscribeEventHandlers() {
         if (coolOutlets) {
             subscribe(thermostat, "coolingSetpoint", setpointHandler)
         }
-        if (dimmer) {
-            subscribe(dimmer, "level", levelHandler)
-        }
     } else if (simulatedTemperatureSensors) {
         subscribe(sensor, "temperature", temperatureHandler)
+    }
+    if (dimmer) {
+        subscribe(dimmer, "level", levelHandler)
     }
 }
 
