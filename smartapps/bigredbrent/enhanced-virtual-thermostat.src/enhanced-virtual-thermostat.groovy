@@ -83,7 +83,7 @@ private def subscribeEventHandlers() {
             subscribe(thermostat, "coolingSetpoint", setpointHandler)
         }
         if (dimmers) {
-            subscribe(dimmers, "level", levelHandler)
+            subscribe(dimmers, "switch.level", levelHandler)
         }
     } else if (simulatedTemperatureSensors) {
         subscribe(sensor, "temperature", temperatureHandler)
