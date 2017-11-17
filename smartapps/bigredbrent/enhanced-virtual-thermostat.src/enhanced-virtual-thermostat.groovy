@@ -45,7 +45,7 @@ preferences {
         input "threshold", "decimal", title: "Threshold", defaultValue: 0.1, required: true
     }
     section("Dimmer Switch(s) for optional control of the simulated thermostat... (not required)"){
-        input "dimmers", "capability.switchLevel", title: "Simulated Dimmer Switch", multiple: true, required: false
+        input "dimmerSwitchs", "capability.switchLevel", title: "Simulated Dimmer Switch", multiple: true, required: false
     }
     section("Simulated temperature sensor(s) to copy the current temperature to... (not required)"){
         input "simulatedTemperatureSensors", "capability.temperatureMeasurement", title: "Simulated Temperature Sensors", multiple: true, required: false
@@ -82,8 +82,8 @@ private def subscribeEventHandlers() {
         if (coolOutlets) {
             subscribe(thermostat, "coolingSetpoint", setpointHandler)
         }
-        if (dimmers) {
-            subscribe(dimmers, "switch.level", levelHandler)
+        if (dimmerSwitchs) {
+            subscribe(dimmerSwitchs, "level", levelHandler)
         }
     } else if (simulatedTemperatureSensors) {
         subscribe(sensor, "temperature", temperatureHandler)
@@ -122,9 +122,9 @@ def levelHandler(evt) {
         } else if (level < 37){
             level = 37
         }
-        thermostat.setHeatingSetpoint(level - 2)
-        thermostat.setCoolingSetpoint(level + 2)
     }
+    thermostat.setHeatingSetpoint(level - 2)
+    thermostat.setCoolingSetpoint(level + 2)
 }
 
 private def setThermostatTemperature() {
