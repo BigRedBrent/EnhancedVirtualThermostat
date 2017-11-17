@@ -44,28 +44,35 @@ preferences {
     section("How far away from the desired temperature before activating..."){
         input "threshold", "decimal", title: "Threshold", defaultValue: 0.1, required: true
     }
+    section("Dimmer Switch for optional control of the simulated thermostat... (not required)"){
+        input "dimmer", "capability.switchLevel", title: "Simulated Dimmer Switch", required: false
+    }
     section("Simulated temperature sensor(s) to copy the current temperature to... (not required)"){
         input "simulatedTemperatureSensors", "capability.temperatureMeasurement", title: "Simulated Temperature Sensors", multiple: true, required: false
     }
 }
 
-def installed()
-{
-    subscribeEventHandlers()
+def installed() {
+    runUpdate()
 }
 
-def updated()
-{
+def updated() {
     unsubscribe()
-    subscribeEventHandlers()
+    runUpdate()
 }
 
-private def subscribeEventHandlers()
-{
+private def runUpdate() {
+    subscribeEventHandlers()
     setThermostatTemperature()
     if (simulatedTemperatureSensors) {
         simulatedTemperatureSensors.setTemperature(sensor.currentValue("temperature"))
     }
+    if (heatOutlets || coolOutlets || emergencyHeatOutlets) {
+        evaluate()
+    }
+}
+
+private def subscribeEventHandlers() {
     if (heatOutlets || coolOutlets || emergencyHeatOutlets) {
         subscribe(sensor, "temperature", temperatureHandler)
         subscribe(thermostat, "thermostatMode", setpointHandler)
@@ -75,14 +82,15 @@ private def subscribeEventHandlers()
         if (coolOutlets) {
             subscribe(thermostat, "coolingSetpoint", setpointHandler)
         }
-        evaluate()
+        if (dimmer) {
+            subscribe(dimmer, "level", levelHandler)
+        }
     } else if (simulatedTemperatureSensors) {
         subscribe(sensor, "temperature", temperatureHandler)
     }
 }
 
-def temperatureHandler(evt)
-{
+def temperatureHandler(evt) {
     if (simulatedTemperatureSensors) {
         simulatedTemperatureSensors.setTemperature(evt.value)
     }
@@ -91,24 +99,52 @@ def temperatureHandler(evt)
     }
 }
 
-def setpointHandler(evt)
-{
+def setpointHandler(evt) {
     setThermostatTemperature()
     evaluate()
 }
 
-private def setThermostatTemperature()
-{
+def levelHandler(evt) {
+    def level = evt.value
+    def mode = thermostat.currentValue("thermostatMode")
+    if (level > 95) {
+        level = 95
+    } else if (level < 35){
+        level = 35
+    }
+    if (mode == "heat" || mode == "emergency heat") {
+        thermostat.setHeatingSetpoint(level)
+    } else if (mode == "cool") {
+        thermostat.setCoolingSetpoint(level)
+    } else {
+        if (level > 93) {
+            level = 93
+        } else if (level < 37){
+            level = 37
+        }
+        thermostat.setHeatingSetpoint(level - 2)
+        thermostat.setCoolingSetpoint(level + 2)
+    }
+}
+
+private def setThermostatTemperature() {
     def mode = thermostat.currentValue("thermostatMode")
     def currentTemp = sensor.currentValue("temperature")
     def heatingSetpoint = thermostat.currentValue("heatingSetpoint")
     def coolingSetpoint = thermostat.currentValue("coolingSetpoint")
     if (mode == "auto" && coolingSetpoint - heatingSetpoint < 4) {
         if (heatingSetpoint + 4 <= 95) {
-            thermostat.setCoolingSetpoint(heatingSetpoint + 4)
+            coolingSetpoint = heatingSetpoint + 4
+            unsubscribe()
+            thermostat.setCoolingSetpoint(coolingSetpoint)
+            subscribeEventHandlers()
         } else {
-            thermostat.setHeatingSetpoint(91)
-            thermostat.setCoolingSetpoint(95)
+            heatingSetpoint = 91
+            coolingSetpoint = 95
+            unsubscribe()
+            thermostat.setHeatingSetpoint(heatingSetpoint)
+            thermostat.setCoolingSetpoint(coolingSetpoint)
+            subscribeEventHandlers()
         }
     }
     if ((mode == "heat" && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets) || (mode == "auto" && heatOutlets && (!coolOutlets || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp))) {
@@ -120,8 +156,7 @@ private def setThermostatTemperature()
     }
 }
 
-private evaluate()
-{
+private evaluate() {
     def mode = thermostat.currentValue("thermostatMode")
     def currentTemp = sensor.currentValue("temperature")
     def heatingSetpoint = thermostat.currentValue("heatingSetpoint")
