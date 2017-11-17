@@ -122,9 +122,9 @@ def levelHandler(evt) {
         } else if (level < 37){
             level = 37
         }
+        thermostat.setHeatingSetpoint(level - 2)
+        thermostat.setCoolingSetpoint(level + 2)
     }
-    thermostat.setHeatingSetpoint(level - 2)
-    thermostat.setCoolingSetpoint(level + 2)
 }
 
 private def setThermostatTemperature() {
