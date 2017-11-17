@@ -44,8 +44,8 @@ preferences {
     section("How far away from the desired temperature before activating..."){
         input "threshold", "decimal", title: "Threshold", defaultValue: 0.1, required: true
     }
-    section("Dimmer Switch(s) for optional control of the simulated thermostat... (not required)"){
-        input "dimmerSwitchs", "capability.switchLevel", title: "Simulated Dimmer Switch", multiple: true, required: false
+    section("Dimmer Switch for optional control of the simulated thermostat... (not required)"){
+        input "dimmer", "capability.switchLevel", title: "Simulated Dimmer Switch", required: false
     }
     section("Simulated temperature sensor(s) to copy the current temperature to... (not required)"){
         input "simulatedTemperatureSensors", "capability.temperatureMeasurement", title: "Simulated Temperature Sensors", multiple: true, required: false
@@ -82,8 +82,8 @@ private def subscribeEventHandlers() {
         if (coolOutlets) {
             subscribe(thermostat, "coolingSetpoint", setpointHandler)
         }
-        if (dimmerSwitchs) {
-            subscribe(dimmerSwitchs, "level", levelHandler)
+        if (dimmer) {
+            subscribe(dimmer, "level", levelHandler)
         }
     } else if (simulatedTemperatureSensors) {
         subscribe(sensor, "temperature", temperatureHandler)
@@ -105,7 +105,7 @@ def setpointHandler(evt) {
 }
 
 def levelHandler(evt) {
-    def level = evt.value
+    def level = dimmer.currentValue("level")
     def mode = thermostat.currentValue("thermostatMode")
     if (level > 95) {
         level = 95
