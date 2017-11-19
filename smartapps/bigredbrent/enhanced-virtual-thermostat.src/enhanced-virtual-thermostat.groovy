@@ -113,18 +113,26 @@ def levelHandler(evt) {
         level = 35
     }
     if (((mode == "heat" || (mode == "auto" && !coolOutlets)) && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets)) {
+        unsubscribe()
         thermostat.setHeatingSetpoint(level)
+        subscribeEventHandlers()
     } else if ((mode == "cool" || (mode == "auto" && !heatOutlets)) && coolOutlets) {
+        unsubscribe()
         thermostat.setCoolingSetpoint(level)
+        subscribeEventHandlers()
     } else if (mode == "auto" && heatOutlets && coolOutlets) {
         if (level > 93) {
             level = 93
         } else if (level < 37){
             level = 37
         }
+        unsubscribe()
         thermostat.setHeatingSetpoint(level - 2)
         thermostat.setCoolingSetpoint(level + 2)
+        subscribeEventHandlers()
     }
+    setThermostatTemperature()
+    evaluate()
 }
 
 private def setThermostatTemperature() {
