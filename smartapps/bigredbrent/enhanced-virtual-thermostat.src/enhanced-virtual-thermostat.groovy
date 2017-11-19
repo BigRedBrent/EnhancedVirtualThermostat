@@ -112,11 +112,11 @@ def levelHandler(evt) {
     } else if (level < 35){
         level = 35
     }
-    if ((mode == "heat" || mode == "emergency heat") && (heatOutlets || emergencyHeatOutlets)) {
+    if (((mode == "heat" || (mode == "auto" && !coolOutlets)) && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets)) {
         thermostat.setHeatingSetpoint(level)
-    } else if ((mode == "cool") && coolOutlets) {
+    } else if ((mode == "cool" || (mode == "auto" && !heatOutlets)) && coolOutlets) {
         thermostat.setCoolingSetpoint(level)
-    } else {
+    } else if (mode == "auto" && heatOutlets && coolOutlets) {
         if (level > 93) {
             level = 93
         } else if (level < 37){
@@ -150,7 +150,7 @@ private def setThermostatTemperature() {
     if ((mode == "heat" && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets) || (mode == "auto" && heatOutlets && (!coolOutlets || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp))) {
         thermostat.setTemperature(heatingSetpoint)
         if (dimmer) {
-            if (mode == "auto") {
+            if (mode == "auto" && coolOutlets) {
                 heatingSetpoint = heatingSetpoint + 2
             }
             unsubscribe()
@@ -160,7 +160,7 @@ private def setThermostatTemperature() {
     } else if ((mode == "cool" || mode == "auto") && coolOutlets) {
         thermostat.setTemperature(coolingSetpoint)
         if (dimmer) {
-            if (mode == "auto") {
+            if (mode == "auto" && heatOutlets) {
                 coolingSetpoint = coolingSetpoint - 2
             }
             unsubscribe()
