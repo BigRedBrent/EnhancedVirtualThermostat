@@ -165,8 +165,9 @@ private def setThermostatTemperature() {
         thermostat.setTemperature()
         if (dimmer) {
             unsubscribe()
-            dimmer.setLevel()
+            dimmer.setLevel(1)
             subscribeEventHandlers()
+            dimmer.off()
         }
     }
 }
