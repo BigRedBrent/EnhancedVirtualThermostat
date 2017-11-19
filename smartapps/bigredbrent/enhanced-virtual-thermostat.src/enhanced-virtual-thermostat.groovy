@@ -131,8 +131,7 @@ def levelHandler(evt) {
         thermostat.setCoolingSetpoint(level + 2)
         subscribeEventHandlers()
     }
-    setThermostatTemperature()
-    evaluate()
+    setpointHandler(evt)
 }
 
 private def setThermostatTemperature() {
