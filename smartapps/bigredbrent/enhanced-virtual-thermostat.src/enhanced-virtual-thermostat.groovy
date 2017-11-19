@@ -75,7 +75,7 @@ private def runUpdate() {
 private def subscribeEventHandlers() {
     if (heatOutlets || coolOutlets || emergencyHeatOutlets) {
         subscribe(sensor, "temperature", temperatureHandler)
-        subscribe(thermostat, "thermostatMode", setpointHandler)
+        subscribe(thermostat, "thermostatMode", thermostatModeHandler)
         if (heatOutlets || emergencyHeatOutlets) {
             subscribe(thermostat, "heatingSetpoint", setpointHandler)
         }
@@ -99,9 +99,19 @@ def temperatureHandler(evt) {
     }
 }
 
+def thermostatModeHandler(evt) {
+    setThermostatTemperature()
+    evaluate()
+}
+
 def setpointHandler(evt) {
     setThermostatTemperature()
     evaluate()
+    if (dimmer) {
+        unsubscribe()
+        dimmer.setLevel(evt.value)
+        subscribeEventHandlers()
+    }
 }
 
 def levelHandler(evt) {
