@@ -75,7 +75,7 @@ private def runUpdate() {
 private def subscribeEventHandlers() {
     if (heatOutlets || coolOutlets || emergencyHeatOutlets) {
         subscribe(sensor, "temperature", temperatureHandler)
-        subscribe(thermostat, "thermostatMode", thermostatModeHandler)
+        subscribe(thermostat, "thermostatMode", setpointHandler)
         if (heatOutlets || emergencyHeatOutlets) {
             subscribe(thermostat, "heatingSetpoint", setpointHandler)
         }
@@ -99,19 +99,9 @@ def temperatureHandler(evt) {
     }
 }
 
-def thermostatModeHandler(evt) {
-    setThermostatTemperature()
-    evaluate()
-}
-
 def setpointHandler(evt) {
     setThermostatTemperature()
     evaluate()
-    if (dimmer) {
-        unsubscribe()
-        dimmer.setLevel(evt.value)
-        subscribeEventHandlers()
-    }
 }
 
 def levelHandler(evt) {
@@ -159,10 +149,25 @@ private def setThermostatTemperature() {
     }
     if ((mode == "heat" && heatOutlets) || (mode == "emergency heat" && emergencyHeatOutlets) || (mode == "auto" && heatOutlets && (!coolOutlets || currentTemp - heatingSetpoint <= coolingSetpoint - currentTemp))) {
         thermostat.setTemperature(heatingSetpoint)
+        if (dimmer) {
+            unsubscribe()
+            dimmer.setLevel(heatingSetpoint)
+            subscribeEventHandlers()
+        }
     } else if ((mode == "cool" || mode == "auto") && coolOutlets) {
         thermostat.setTemperature(coolingSetpoint)
+        if (dimmer) {
+            unsubscribe()
+            dimmer.setLevel(coolingSetpoint)
+            subscribeEventHandlers()
+        }
     } else {
         thermostat.setTemperature()
+        if (dimmer) {
+            unsubscribe()
+            dimmer.setLevel()
+            subscribeEventHandlers()
+        }
     }
 }
 
