@@ -167,7 +167,6 @@ private def setThermostatTemperature() {
             unsubscribe()
             dimmer.setLevel(1)
             subscribeEventHandlers()
-            dimmer.off()
         }
     }
 }
